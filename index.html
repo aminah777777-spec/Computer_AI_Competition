@@ -878,14 +878,10 @@
             }
 
             const nextBtn = document.getElementById('btn-next');
-            try {
-                await saveProgress();
-            } catch (error) {
-                console.error("Could not save answer:", error);
-                document.getElementById('feedback-msg').textContent = dict[currentLang].errDb;
-                document.getElementById('feedback-msg').className = 'text-sm font-bold text-red-400 visible';
-                return;
-            }
+
+            // No database request here.
+            // The score stays in the browser during the quiz.
+            // It is saved only once at the end.
 
             // Enable Next Button
             nextBtn.disabled = false;
@@ -894,13 +890,9 @@
         }
 
         async function saveProgress() {
-            if (!docId) throw new Error("MISSING_DOCUMENT_ID");
-
-            await window.dbUpdateParticipant(docId, {
-                score: score,
-                answeredQuestions: Math.min(currentIndex + 1, currentQuestions.length),
-                status: 'Incomplete'
-            });
+            // Disabled intentionally.
+            // The final score is saved once in finishCompetition().
+            return true;
         }
 
         function nextQuestion() {
@@ -915,9 +907,7 @@
             try {
                 await window.dbUpdateParticipant(docId, {
                     status: 'Completed',
-                    completionStatus: 'Completed',
-                    score: score,
-                    answeredQuestions: currentQuestions.length
+                    score: score
                 });
             } catch (error) {
                 console.error("Final save failed:", error);
