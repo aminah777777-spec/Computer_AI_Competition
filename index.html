@@ -149,10 +149,6 @@
                     العربية
                 </button>
             </div>
-            <div class="mt-5 text-center text-sm sm:text-base font-semibold leading-relaxed">
-                <p class="text-brand-orange font-arabic">هذه المسابقة مخصصة لطلاب المرحلة الإعدادية فقط.</p>
-                <p class="text-gray-300 mt-1">This competition is for Preparatory Stage students only.</p>
-            </div>
             <button onclick="showAdminLogin()" class="mt-8 text-sm text-gray-500 hover:text-white transition underline">Admin Access</button>
         </section>
 
@@ -346,143 +342,101 @@
         </section>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import {
-            getFirestore, doc, getDoc, addDoc, updateDoc, collection,
-            getDocs, runTransaction
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // Google Apps Script backend
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVzCYxFH12cqGmfPD5x59CS97l0lmhOMwW6ylG6wymyVQiRs0HBJ23UdrDbWjJ-X-W-A/exec";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDkkseQSc_JRjmMHlHsXjl8IH80raxXPA",
-            authDomain: "gmi-competition.firebaseapp.com",
-            projectId: "gmi-competition",
-            storageBucket: "gmi-competition.firebasestorage.app",
-            messagingSenderId: "443424762315",
-            appId: "1:443424762315:web:e212d2bb7de93a00d76e4e",
-            measurementId: "G-S2L5JFQ185"
-        };
+        function appsScriptRequest(params) {
+            return new Promise((resolve, reject) => {
+                const callbackName = "gmiCallback_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+                const script = document.createElement("script");
+                const query = new URLSearchParams({ ...params, callback: callbackName });
+                const timeout = setTimeout(() => {
+                    cleanup();
+                    reject(new Error("APPS_SCRIPT_TIMEOUT"));
+                }, 15000);
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        let currentUserUid = null;
-        let isFirebaseActive = false;
-        const COLLECTION_NAME = "participants";
-
-        // IMPORTANT: Do not silently fall back to a temporary in-memory database.
-        // The official competition must fail safely if Firebase is unavailable.
-        const firebaseReadyPromise = (async () => {
-            try {
-                if (auth.currentUser) {
-                    currentUserUid = auth.currentUser.uid;
-                } else {
-                    const credential = await signInAnonymously(auth);
-                    currentUserUid = credential.user.uid;
+                function cleanup() {
+                    clearTimeout(timeout);
+                    delete window[callbackName];
+                    script.remove();
                 }
-                isFirebaseActive = true;
-                console.log("Firebase authentication successful.");
-                return true;
-            } catch (error) {
-                isFirebaseActive = false;
-                console.error("Firebase initialization failed:", error);
-                return false;
-            }
-        })();
 
-        window.dbWaitUntilReady = async () => await firebaseReadyPromise;
+                window[callbackName] = (data) => {
+                    cleanup();
+                    resolve(data);
+                };
 
-        function normalizeEmail(email) {
-            return String(email || "").trim().toLowerCase();
+                script.onerror = () => {
+                    cleanup();
+                    reject(new Error("APPS_SCRIPT_NETWORK_ERROR"));
+                };
+
+                script.src = APPS_SCRIPT_URL + "?" + query.toString();
+                document.head.appendChild(script);
+            });
         }
 
-        async function emailDocumentId(email) {
-            const normalized = normalizeEmail(email);
-            const bytes = new TextEncoder().encode(normalized);
-            const hashBuffer = await crypto.subtle.digest("SHA-256", bytes);
-            return Array.from(new Uint8Array(hashBuffer))
-                .map(b => b.toString(16).padStart(2, "0"))
-                .join("");
-        }
+        window.dbWaitUntilReady = async () => true;
 
         window.dbCheckEmailExists = async (email) => {
-            const ready = await firebaseReadyPromise;
-            if (!ready) throw new Error("FIREBASE_UNAVAILABLE");
-
-            const id = await emailDocumentId(email);
-            const ref = doc(db, COLLECTION_NAME, id);
-            const snapshot = await getDoc(ref);
-            return snapshot.exists();
+            // The backend checks duplicates atomically during registration.
+            // This function remains for compatibility with the existing page.
+            return false;
         };
 
-        // Atomically creates the participant record only if this email has never
-        // participated. This closes the race condition in "check then addDoc".
         window.dbCreateParticipant = async (data) => {
-            const ready = await firebaseReadyPromise;
-            if (!ready) throw new Error("FIREBASE_UNAVAILABLE");
+            const result = await appsScriptRequest({
+                action: "register",
+                name: data.name || "",
+                class: data.class || "",
+                email: data.email || "",
+                language: data.language || "",
+                totalQuestions: data.totalQuestions || 0
+            });
 
-            const normalizedEmail = normalizeEmail(data.email);
-            const id = await emailDocumentId(normalizedEmail);
-            const ref = doc(db, COLLECTION_NAME, id);
-
-            const record = {
-                ...data,
-                email: normalizedEmail,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                completionStatus: "Incomplete"
-            };
-
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const existing = await transaction.get(ref);
-                    if (existing.exists()) {
-                        const error = new Error("EMAIL_ALREADY_USED");
-                        error.code = "EMAIL_ALREADY_USED";
-                        throw error;
-                    }
-                    transaction.set(ref, record);
-                });
-
-                return id;
-            } catch (error) {
-                console.error("Participant creation failed:", error);
-                if (error.code === "EMAIL_ALREADY_USED" || error.message === "EMAIL_ALREADY_USED") {
-                    const duplicate = new Error("EMAIL_ALREADY_USED");
-                    duplicate.code = "EMAIL_ALREADY_USED";
-                    throw duplicate;
-                }
+            if (!result || !result.success) {
+                const error = new Error(result?.error || "REGISTRATION_FAILED");
+                error.code = result?.error || "REGISTRATION_FAILED";
                 throw error;
             }
+
+            return JSON.stringify({ row: result.row, token: result.token });
         };
 
-        window.dbUpdateParticipant = async (docId, updates) => {
-            const ready = await firebaseReadyPromise;
-            if (!ready) throw new Error("FIREBASE_UNAVAILABLE");
-            if (!docId) throw new Error("MISSING_DOCUMENT_ID");
+        window.dbUpdateParticipant = async (participantKey, updates) => {
+            if (!participantKey) throw new Error("MISSING_PARTICIPANT_KEY");
 
-            const ref = doc(db, COLLECTION_NAME, docId);
-            await updateDoc(ref, {
-                ...updates,
-                updatedAt: new Date().toISOString()
+            let key;
+            try {
+                key = typeof participantKey === "string" ? JSON.parse(participantKey) : participantKey;
+            } catch (e) {
+                throw new Error("INVALID_PARTICIPANT_KEY");
+            }
+
+            const result = await appsScriptRequest({
+                action: "update",
+                row: key.row || "",
+                token: key.token || "",
+                score: updates.score ?? 0,
+                totalQuestions: updates.totalQuestions || 0,
+                status: updates.status || "Incomplete"
             });
+
+            if (!result || !result.success) {
+                const error = new Error(result?.error || "UPDATE_FAILED");
+                error.code = result?.error || "UPDATE_FAILED";
+                throw error;
+            }
+
+            return result;
         };
 
+        // Kept as a compatibility stub. The public participant page does not
+        // request the full results list; the admin dashboard will be migrated
+        // separately to a protected backend read endpoint.
         window.dbGetAllParticipants = async () => {
-            const ready = await firebaseReadyPromise;
-            if (!ready) throw new Error("FIREBASE_UNAVAILABLE");
-
-            const snapshot = await getDocs(collection(db, COLLECTION_NAME));
-            const data = [];
-            snapshot.forEach(item => {
-                data.push({ id: item.id, ...item.data() });
-            });
-
-            return data.sort((a, b) =>
-                new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-            );
+            throw new Error("ADMIN_RESULTS_NOT_CONFIGURED");
         };
     </script>
 
@@ -615,7 +569,7 @@
         let score = 0;
         let timerInterval;
         let timeLeft = 10;
-        let docId = null; // Firestore document ID
+        let docId = null; // Apps Script participant key (row + token)
         let isAnswering = false;
         let participantInfo = {};
 
@@ -716,21 +670,6 @@
             }
 
             try {
-                // Wait for Firebase authentication before ANY database operation.
-                const firebaseReady = await window.dbWaitUntilReady();
-                if (!firebaseReady) {
-                    showError(d.errDb);
-                    resetBtn();
-                    return;
-                }
-
-                // Friendly duplicate check.
-                if (await window.dbCheckEmailExists(email)) {
-                    showError(d.errUsed);
-                    resetBtn();
-                    return;
-                }
-
                 participantInfo = {
                     name,
                     class: pClass,
@@ -742,7 +681,8 @@
                     status: 'Incomplete'
                 };
 
-                // Atomic create: the email can win only once.
+                // Register through Google Apps Script. The backend performs the
+                // duplicate-email check atomically and returns row + token.
                 docId = await window.dbCreateParticipant(participantInfo);
 
             } catch (error) {
@@ -1010,7 +950,14 @@
             switchScreen('admin-dashboard');
             document.getElementById('admin-loading').classList.remove('hidden');
             
-            adminDataCache = await window.dbGetAllParticipants();
+            try {
+                adminDataCache = await window.dbGetAllParticipants();
+            } catch (error) {
+                console.error("Admin results error:", error);
+                document.getElementById('admin-loading').classList.add('hidden');
+                alert("Admin results are not connected yet. Please use the Google Sheet for now.");
+                return;
+            }
             
             // Calculate Stats
             let total = adminDataCache.length;
