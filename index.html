@@ -344,10 +344,12 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, addDoc, updateDoc, collection, getDocs, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            getFirestore, doc, getDoc, addDoc, updateDoc, collection,
+            getDocs, runTransaction
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Setup using your exact config
         const firebaseConfig = {
             apiKey: "AIzaSyDkkseQSc_JRjmMHl1HsXjl8IH80raxXPA",
             authDomain: "gmi-competition.firebaseapp.com",
@@ -361,105 +363,122 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        
+
         let currentUserUid = null;
         let isFirebaseActive = false;
-        const COLLECTION_NAME = 'participants';
-        
-        // Local fallback cache for preview environment
-        let localFallbackData = [];
-        
-        // Critical: Auth first
-        async function initAuth() {
+        const COLLECTION_NAME = "participants";
+
+        // IMPORTANT: Do not silently fall back to a temporary in-memory database.
+        // The official competition must fail safely if Firebase is unavailable.
+        const firebaseReadyPromise = (async () => {
             try {
-                const userCredential = await signInAnonymously(auth);
-                currentUserUid = userCredential.user.uid;
+                if (auth.currentUser) {
+                    currentUserUid = auth.currentUser.uid;
+                } else {
+                    const credential = await signInAnonymously(auth);
+                    currentUserUid = credential.user.uid;
+                }
                 isFirebaseActive = true;
-                console.log("Authenticated with GMI Firebase, ready to access Firestore");
+                console.log("Firebase authentication successful.");
+                return true;
             } catch (error) {
-                console.warn("Firebase Auth Error: " + error.message);
-                console.warn("Running in local Fallback Mode. (Normal if project is very new or running in Sandbox preview).");
                 isFirebaseActive = false;
+                console.error("Firebase initialization failed:", error);
+                return false;
             }
+        })();
+
+        window.dbWaitUntilReady = async () => await firebaseReadyPromise;
+
+        function normalizeEmail(email) {
+            return String(email || "").trim().toLowerCase();
         }
 
-        // Initialize immediately
-        initAuth();
+        async function emailDocumentId(email) {
+            const normalized = normalizeEmail(email);
+            const bytes = new TextEncoder().encode(normalized);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", bytes);
+            return Array.from(new Uint8Array(hashBuffer))
+                .map(b => b.toString(16).padStart(2, "0"))
+                .join("");
+        }
 
-        // --- EXPOSE NECESSARY DB FUNCTIONS TO WINDOW FOR HTML EVENT HANDLERS ---
+        window.dbCheckEmailExists = async (email) => {
+            const ready = await firebaseReadyPromise;
+            if (!ready) throw new Error("FIREBASE_UNAVAILABLE");
+
+            const id = await emailDocumentId(email);
+            const ref = doc(db, COLLECTION_NAME, id);
+            const snapshot = await getDoc(ref);
+            return snapshot.exists();
+        };
+
+        // Atomically creates the participant record only if this email has never
+        // participated. This closes the race condition in "check then addDoc".
         window.dbCreateParticipant = async (data) => {
-            const record = { ...data, createdAt: new Date().toISOString() };
-            if (!isFirebaseActive) {
-                const id = 'local_' + Date.now();
-                localFallbackData.push({ id, ...record });
-                return id;
-            }
+            const ready = await firebaseReadyPromise;
+            if (!ready) throw new Error("FIREBASE_UNAVAILABLE");
+
+            const normalizedEmail = normalizeEmail(data.email);
+            const id = await emailDocumentId(normalizedEmail);
+            const ref = doc(db, COLLECTION_NAME, id);
+
+            const record = {
+                ...data,
+                email: normalizedEmail,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                completionStatus: "Incomplete"
+            };
+
             try {
-                const colRef = collection(db, COLLECTION_NAME);
-                const docRef = await addDoc(colRef, record);
-                return docRef.id;
-            } catch (e) {
-                console.error("Error creating record:", e);
-                const id = 'local_' + Date.now();
-                localFallbackData.push({ id, ...record });
+                await runTransaction(db, async (transaction) => {
+                    const existing = await transaction.get(ref);
+                    if (existing.exists()) {
+                        const error = new Error("EMAIL_ALREADY_USED");
+                        error.code = "EMAIL_ALREADY_USED";
+                        throw error;
+                    }
+                    transaction.set(ref, record);
+                });
+
                 return id;
+            } catch (error) {
+                console.error("Participant creation failed:", error);
+                if (error.code === "EMAIL_ALREADY_USED" || error.message === "EMAIL_ALREADY_USED") {
+                    const duplicate = new Error("EMAIL_ALREADY_USED");
+                    duplicate.code = "EMAIL_ALREADY_USED";
+                    throw duplicate;
+                }
+                throw error;
             }
         };
 
         window.dbUpdateParticipant = async (docId, updates) => {
-            if (!isFirebaseActive || docId.startsWith('local_')) {
-                const index = localFallbackData.findIndex(p => p.id === docId);
-                if (index !== -1) {
-                    localFallbackData[index] = { ...localFallbackData[index], ...updates };
-                }
-                return;
-            }
-            try {
-                const docRef = doc(db, COLLECTION_NAME, docId);
-                await updateDoc(docRef, updates);
-            } catch (e) {
-                console.error("Error updating record:", e);
-            }
-        };
+            const ready = await firebaseReadyPromise;
+            if (!ready) throw new Error("FIREBASE_UNAVAILABLE");
+            if (!docId) throw new Error("MISSING_DOCUMENT_ID");
 
-        window.dbCheckEmailExists = async (email) => {
-             if (!isFirebaseActive) {
-                 return localFallbackData.some(p => p.email.toLowerCase() === email.toLowerCase());
-             }
-             try {
-                const colRef = collection(db, COLLECTION_NAME);
-                const snapshot = await getDocs(colRef);
-                let exists = false;
-                snapshot.forEach(doc => {
-                    if (doc.data().email.toLowerCase() === email.toLowerCase()) {
-                        exists = true;
-                    }
-                });
-                return exists;
-             } catch (e) {
-                 console.error("Error checking email:", e);
-                 return false; 
-             }
+            const ref = doc(db, COLLECTION_NAME, docId);
+            await updateDoc(ref, {
+                ...updates,
+                updatedAt: new Date().toISOString()
+            });
         };
 
         window.dbGetAllParticipants = async () => {
-             if (!isFirebaseActive) {
-                 return localFallbackData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-             }
-             try {
-                const colRef = collection(db, COLLECTION_NAME);
-                const snapshot = await getDocs(colRef);
-                const data = [];
-                snapshot.forEach(doc => {
-                    data.push({ id: doc.id, ...doc.data() });
-                });
-                // Combine with any local data just in case
-                const combined = [...data, ...localFallbackData];
-                return combined.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-             } catch (e) {
-                 console.error("Error fetching admin data:", e);
-                 return localFallbackData;
-             }
+            const ready = await firebaseReadyPromise;
+            if (!ready) throw new Error("FIREBASE_UNAVAILABLE");
+
+            const snapshot = await getDocs(collection(db, COLLECTION_NAME));
+            const data = [];
+            snapshot.forEach(item => {
+                data.push({ id: item.id, ...item.data() });
+            });
+
+            return data.sort((a, b) =>
+                new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+            );
         };
     </script>
 
@@ -665,7 +684,7 @@
 
         async function handleRegistration(e) {
             e.preventDefault();
-            
+
             const btn = document.getElementById('btn-start');
             btn.disabled = true;
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Loading...`;
@@ -674,6 +693,11 @@
             const pClass = document.getElementById('reg-class').value.trim();
             const email = document.getElementById('reg-email').value.trim().toLowerCase();
             const d = dict[currentLang];
+
+            const resetBtn = () => {
+                btn.disabled = false;
+                btn.innerHTML = `<span class="t-reg-start">${d.regStart}</span> <i class="fas fa-play"></i>`;
+            };
 
             if (!name || !pClass || !email) {
                 showError(d.errFields);
@@ -687,55 +711,58 @@
                 return;
             }
 
-            // Database Duplicate Check
-            if (typeof window.dbCheckEmailExists !== 'function') {
-                showError(d.errDb);
+            try {
+                // Wait for Firebase authentication before ANY database operation.
+                const firebaseReady = await window.dbWaitUntilReady();
+                if (!firebaseReady) {
+                    showError(d.errDb);
+                    resetBtn();
+                    return;
+                }
+
+                // Friendly duplicate check.
+                if (await window.dbCheckEmailExists(email)) {
+                    showError(d.errUsed);
+                    resetBtn();
+                    return;
+                }
+
+                participantInfo = {
+                    name,
+                    class: pClass,
+                    email,
+                    language: currentLang === 'en' ? 'English' : 'Arabic',
+                    score: 0,
+                    totalQuestions: currentQuestions.length,
+                    answeredQuestions: 0,
+                    status: 'Incomplete'
+                };
+
+                // Atomic create: the email can win only once.
+                docId = await window.dbCreateParticipant(participantInfo);
+
+            } catch (error) {
+                console.error("Registration/database error:", error);
+
+                if (error.code === 'EMAIL_ALREADY_USED' || error.message === 'EMAIL_ALREADY_USED') {
+                    showError(d.errUsed);
+                } else {
+                    showError(d.errDb);
+                }
+
                 resetBtn();
                 return;
             }
 
-            const exists = await window.dbCheckEmailExists(email);
-            if (exists) {
-                showError(d.errUsed);
-                resetBtn();
-                return;
-            }
-
-            // Create Incomplete Record Immediately
-            participantInfo = {
-                name,
-                class: pClass,
-                email,
-                language: currentLang === 'en' ? 'English' : 'Arabic',
-                score: 0,
-                totalQuestions: currentQuestions.length,
-                answeredQuestions: 0,
-                status: 'Incomplete'
-            };
-
-            docId = await window.dbCreateParticipant(participantInfo);
-            
-            if (!docId) {
-                showError(d.errDb);
-                resetBtn();
-                return;
-            }
-
-            // Setup Quiz
             document.getElementById('quiz-student-name').textContent = name;
             document.getElementById('quiz-student-class').textContent = pClass;
             document.getElementById('q-total').textContent = currentQuestions.length;
-            
+
             currentIndex = 0;
             score = 0;
-            
+
             switchScreen('quiz');
             loadQuestion();
-
-            function resetBtn() {
-                btn.disabled = false;
-                btn.innerHTML = `<span class="t-reg-start">${d.regStart}</span> <i class="fas fa-play"></i>`;
-            }
         }
 
         function playBeep() {
@@ -870,7 +897,7 @@
             }, 1500);
         }
 
-        function selectAnswer(selectedIndex, btnElement) {
+        async function selectAnswer(selectedIndex, btnElement) {
             if (isAnswering) return;
             isAnswering = true;
             clearInterval(timerInterval);
@@ -895,23 +922,31 @@
                 fb.className = 'text-sm font-bold text-red-400 visible';
             }
 
-            saveProgress();
+            // Persist the answer before allowing the student to continue.
+            const nextBtn = document.getElementById('btn-next');
+            try {
+                await saveProgress();
+            } catch (error) {
+                console.error("Could not save answer:", error);
+                document.getElementById('feedback-msg').textContent = dict[currentLang].errDb;
+                document.getElementById('feedback-msg').className = 'text-sm font-bold text-red-400 visible';
+                return;
+            }
 
             // Enable Next Button
-            const nextBtn = document.getElementById('btn-next');
             nextBtn.disabled = false;
             nextBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-600', 'text-gray-300');
             nextBtn.classList.add('bg-brand-orange', 'hover:bg-orange-600', 'text-white', 'shadow-lg');
         }
 
-        function saveProgress() {
-            // Background save to Firestore
-            if (docId) {
-                window.dbUpdateParticipant(docId, {
-                    score: score,
-                    answeredQuestions: currentIndex + 1
-                });
-            }
+        async function saveProgress() {
+            if (!docId) throw new Error("MISSING_DOCUMENT_ID");
+
+            await window.dbUpdateParticipant(docId, {
+                score: score,
+                answeredQuestions: Math.min(currentIndex + 1, currentQuestions.length),
+                status: 'Incomplete'
+            });
         }
 
         function nextQuestion() {
@@ -919,20 +954,26 @@
             loadQuestion();
         }
 
-        function finishCompetition() {
+        async function finishCompetition() {
             clearInterval(timerInterval);
             document.getElementById('progress-bar').style.width = `100%`;
-            
-            // Final save as Completed
-            if (docId) {
-                window.dbUpdateParticipant(docId, {
+
+            // Do not display a successful result until the final record is saved.
+            try {
+                await window.dbUpdateParticipant(docId, {
                     status: 'Completed',
+                    completionStatus: 'Completed',
                     score: score,
                     answeredQuestions: currentQuestions.length
                 });
+            } catch (error) {
+                console.error("Final save failed:", error);
+                alert(dict[currentLang].errDb);
+                return;
             }
 
-            // Populate Results
+            participantInfo.status = 'Completed';
+
             document.getElementById('res-name').textContent = participantInfo.name;
             document.getElementById('res-class').textContent = participantInfo.class;
             document.getElementById('res-lang').textContent = participantInfo.language;
