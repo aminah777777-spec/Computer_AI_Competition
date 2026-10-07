@@ -62,7 +62,7 @@
         }
         .timer-circle {
             transition: stroke-dashoffset 1s linear;
-            stroke-dasharray: 283; /* 2 * pi * r (45) */
+            stroke-dasharray: 283;
             stroke-dashoffset: 0;
         }
         
@@ -90,7 +90,6 @@
             color: white;
         }
 
-        /* Custom Scrollbar for Admin Table */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -106,7 +105,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
-        /* Particle Background Effect */
         #particles {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -122,15 +120,15 @@
 
     <!-- Header (Always visible) -->
     <header class="w-full max-w-4xl mx-auto flex flex-col items-center justify-center mb-8 z-10 text-center">
+        <!-- تأكد من وجود ملف logo.jpeg في نفس المجلد -->
         <img src="logo.jpeg" alt="GMI Logo" class="h-32 sm:h-48 object-contain mb-6 rounded-xl shadow-2xl drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
         <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-wide t-school-name">AlGhad AlMoshreq Azharian Language Institute</h1>
         <p class="text-brand-orange font-semibold mt-1 t-dept">Computer Department – Preparatory & Secondary</p>
     </header>
 
-    <!-- Main Content Container -->
     <main class="w-full max-w-4xl flex-grow flex flex-col items-center justify-center relative z-10">
 
-        <!-- SCREEN 1: Welcome & Language Selection -->
+        <!-- SCREEN 1: Welcome -->
         <section id="screen-welcome" class="screen active flex-col items-center w-full max-w-2xl text-center glass-panel p-8 sm:p-12">
             <div class="mb-8">
                 <i class="fas fa-laptop-code text-5xl text-brand-orange mb-4"></i>
@@ -187,8 +185,6 @@
 
         <!-- SCREEN 3: Quiz -->
         <section id="screen-quiz" class="screen flex-col w-full max-w-3xl glass-panel p-6 sm:p-10 relative">
-            
-            <!-- Top Bar: Progress & Info -->
             <div class="flex justify-between items-end mb-6 border-b border-gray-700 pb-4">
                 <div>
                     <p class="text-brand-orange font-bold text-sm sm:text-base" id="quiz-student-name">Student Name</p>
@@ -202,9 +198,7 @@
                 </div>
             </div>
 
-            <!-- Timer and Question -->
             <div class="flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-8">
-                <!-- Timer SVG -->
                 <div class="relative w-24 h-24 flex-shrink-0">
                     <svg class="timer-ring w-full h-full" viewBox="0 0 100 100">
                         <circle class="text-gray-700 stroke-current" stroke-width="8" cx="50" cy="50" r="45" fill="transparent"></circle>
@@ -221,12 +215,8 @@
                 </div>
             </div>
 
-            <!-- Options -->
-            <div id="options-container" class="flex flex-col gap-3 mb-8">
-                <!-- Options injected via JS -->
-            </div>
+            <div id="options-container" class="flex flex-col gap-3 mb-8"></div>
 
-            <!-- Bottom Actions -->
             <div class="flex justify-between items-center mt-auto border-t border-gray-700 pt-6">
                 <div id="feedback-msg" class="text-sm font-semibold invisible">Message</div>
                 <button id="btn-next" onclick="nextQuestion()" disabled class="bg-gray-600 text-gray-300 font-bold py-3 px-8 rounded-lg transition opacity-50 cursor-not-allowed flex items-center gap-2">
@@ -237,7 +227,6 @@
 
         <!-- SCREEN 4: Results -->
         <section id="screen-results" class="screen flex-col items-center w-full max-w-xl glass-panel p-10 text-center relative overflow-hidden">
-            <!-- Confetti effect container -->
             <div id="confetti" class="absolute inset-0 pointer-events-none"></div>
             
             <i class="fas fa-trophy text-6xl text-yellow-400 mb-6 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]"></i>
@@ -297,7 +286,6 @@
                 </div>
             </div>
 
-            <!-- Stats Row -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-gray-800 p-4 rounded-lg border border-gray-700 text-center">
                     <div class="text-gray-400 text-sm mb-1">Total Participants</div>
@@ -317,7 +305,6 @@
                 </div>
             </div>
 
-            <!-- Data Table -->
             <div class="flex-grow overflow-auto bg-gray-900 rounded-lg border border-gray-700 relative">
                 <div id="admin-loading" class="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-10 hidden">
                     <i class="fas fa-spinner fa-spin text-4xl text-brand-orange"></i>
@@ -335,7 +322,6 @@
                         </tr>
                     </thead>
                     <tbody id="admin-table-body" class="divide-y divide-gray-800 text-gray-300">
-                        <!-- Rows injected via JS -->
                     </tbody>
                 </table>
             </div>
@@ -343,7 +329,7 @@
     </main>
 
     <script>
-        // Google Apps Script backend
+        // تنبيه: هذا الرابط يجب استبداله بالرابط الخاص بك بعد نشر كود Google Apps Script
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVzCYxFH12cqGmfPD5x59CS97l0lmhOMwW6ylG6wymyVQiRs0HBJ23UdrDbWjJ-X-W-A/exec";
 
         function appsScriptRequest(params) {
@@ -380,8 +366,6 @@
         window.dbWaitUntilReady = async () => true;
 
         window.dbCheckEmailExists = async (email) => {
-            // The backend checks duplicates atomically during registration.
-            // This function remains for compatibility with the existing page.
             return false;
         };
 
@@ -432,11 +416,16 @@
             return result;
         };
 
-        // Kept as a compatibility stub. The public participant page does not
-        // request the full results list; the admin dashboard will be migrated
-        // separately to a protected backend read endpoint.
+        // تم إصلاح هذه الدالة لجلب البيانات من Google Sheets
         window.dbGetAllParticipants = async () => {
-            throw new Error("ADMIN_RESULTS_NOT_CONFIGURED");
+            const result = await appsScriptRequest({
+                action: "getAll"
+            });
+            
+            if (!result || !result.success) {
+                throw new Error(result?.error || "FAILED_TO_FETCH_RESULTS");
+            }
+            return result.data;
         };
     </script>
 
@@ -569,12 +558,11 @@
         let score = 0;
         let timerInterval;
         let timeLeft = 10;
-        let docId = null; // Apps Script participant key (row + token)
+        let docId = null;
         let isAnswering = false;
         let participantInfo = {};
 
         // --- CORE FUNCTIONS ---
-
         function switchScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(`screen-${screenId}`).classList.add('active');
@@ -584,7 +572,6 @@
             currentLang = lang;
             currentQuestions = lang === 'en' ? questionsEN : questionsAR;
             
-            // Apply RTL/LTR
             if (lang === 'ar') {
                 document.body.classList.add('rtl');
                 document.body.setAttribute('dir', 'rtl');
@@ -597,7 +584,6 @@
                 document.getElementById('btn-next-icon').classList.replace('fa-arrow-left', 'fa-arrow-right');
             }
 
-            // Apply Translations
             const d = dict[lang];
             document.querySelector('.t-school-name').textContent = d.schoolName;
             document.querySelector('.t-dept').textContent = d.dept;
@@ -619,7 +605,6 @@
             document.querySelector('.t-res-score').textContent = d.resScore;
             document.querySelector('.t-res-home').textContent = d.resHome;
 
-            // Reset Error
             document.getElementById('reg-error').classList.add('hidden');
             
             switchScreen('register');
@@ -629,7 +614,6 @@
             const errDiv = document.getElementById('reg-error');
             errDiv.textContent = msg;
             errDiv.classList.remove('hidden');
-            // Shake effect
             errDiv.animate([
                 { transform: 'translateX(0)' },
                 { transform: 'translateX(-5px)' },
@@ -681,8 +665,6 @@
                     status: 'Incomplete'
                 };
 
-                // Register through Google Apps Script. The backend performs the
-                // duplicate-email check atomically and returns row + token.
                 docId = await window.dbCreateParticipant(participantInfo);
 
             } catch (error) {
@@ -716,7 +698,7 @@
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(400, ctx.currentTime); // lower pitch beep
+                osc.frequency.setValueAtTime(400, ctx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
                 gain.gain.setValueAtTime(0.2, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
@@ -738,15 +720,12 @@
             isAnswering = false;
             const q = currentQuestions[currentIndex];
             
-            // Update UI
             document.getElementById('q-current').textContent = currentIndex + 1;
             document.getElementById('question-text').textContent = q.q;
             
-            // Progress Bar
             const prog = ((currentIndex) / currentQuestions.length) * 100;
             document.getElementById('progress-bar').style.width = `${Math.max(4, prog)}%`;
 
-            // Setup Options
             const container = document.getElementById('options-container');
             container.innerHTML = '';
             
@@ -754,7 +733,6 @@
                 const btn = document.createElement('button');
                 btn.className = `option-btn w-full text-left rtl:text-right bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg p-4 text-white font-medium shadow-sm flex items-center justify-between`;
                 
-                // Add labels A, B, C, D visually
                 const labelMap = ['A', 'B', 'C', 'D'];
                 const labelMapAr = ['أ', 'ب', 'ج', 'د'];
                 const label = currentLang === 'en' ? labelMap[idx] : labelMapAr[idx];
@@ -766,7 +744,6 @@
                 container.appendChild(btn);
             });
 
-            // Reset UI states
             document.getElementById('feedback-msg').style.visibility = 'hidden';
             const nextBtn = document.getElementById('btn-next');
             nextBtn.disabled = true;
@@ -774,7 +751,6 @@
             nextBtn.classList.remove('bg-brand-orange', 'hover:bg-orange-600', 'text-white');
             nextBtn.classList.add('bg-gray-600', 'text-gray-300');
             
-            // Final button check
             if (currentIndex === currentQuestions.length - 1) {
                 nextBtn.querySelector('span').textContent = dict[currentLang].finish;
                 nextBtn.querySelector('i').className = 'fas fa-flag-checkered';
@@ -806,7 +782,6 @@
             document.getElementById('timer-text').textContent = timeLeft;
             const circle = document.getElementById('timer-path');
             const circumference = 283;
-            // offset calculates drawing backwards
             const offset = circumference - (timeLeft / 10) * circumference;
             circle.style.strokeDashoffset = offset;
             
@@ -826,7 +801,6 @@
             isAnswering = true;
             playBeep();
             
-            // Disable options
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
             
             const fb = document.getElementById('feedback-msg');
@@ -835,7 +809,6 @@
 
             saveProgress();
             
-            // Auto advance after short delay
             setTimeout(() => {
                 nextQuestion();
             }, 1500);
@@ -846,7 +819,6 @@
             isAnswering = true;
             clearInterval(timerInterval);
 
-            // Highlight selected
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
             btnElement.classList.add('selected');
             btnElement.querySelector('i').classList.remove('opacity-0');
@@ -866,7 +838,6 @@
                 fb.className = 'text-sm font-bold text-red-400 visible';
             }
 
-            // Persist the answer before allowing the student to continue.
             const nextBtn = document.getElementById('btn-next');
             try {
                 await saveProgress();
@@ -877,7 +848,6 @@
                 return;
             }
 
-            // Enable Next Button
             nextBtn.disabled = false;
             nextBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-600', 'text-gray-300');
             nextBtn.classList.add('bg-brand-orange', 'hover:bg-orange-600', 'text-white', 'shadow-lg');
@@ -902,7 +872,6 @@
             clearInterval(timerInterval);
             document.getElementById('progress-bar').style.width = `100%`;
 
-            // Do not display a successful result until the final record is saved.
             try {
                 await window.dbUpdateParticipant(docId, {
                     status: 'Completed',
@@ -937,6 +906,8 @@
         function handleAdminLogin(e) {
             e.preventDefault();
             const pwd = document.getElementById('admin-pwd').value;
+            // ملاحظة مراجعة: كلمة المرور مكتوبة هنا بشكل مباشر، يفضل تغييرها لشيء أصعب 
+            // لكنها مقبولة للاستخدام البسيط وغير المعقد
             if (pwd === 'admin123') {
                 loadAdminDashboard();
             } else {
@@ -955,11 +926,10 @@
             } catch (error) {
                 console.error("Admin results error:", error);
                 document.getElementById('admin-loading').classList.add('hidden');
-                alert("Admin results are not connected yet. Please use the Google Sheet for now.");
+                alert("حدث خطأ أثناء جلب البيانات من الخادم.");
                 return;
             }
             
-            // Calculate Stats
             let total = adminDataCache.length;
             let en = 0, ar = 0, completed = 0, totalScore = 0;
             
@@ -1008,7 +978,6 @@
                 return;
             }
 
-            // Format data for Excel
             const exportData = adminDataCache.map(p => {
                 const d = new Date(p.createdAt);
                 return {
@@ -1029,12 +998,9 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Competition Results");
             
-            // Style header row slightly if possible (basic SheetJS CE doesn't support complex styling easily, but basic is fine)
-            
             const filename = `GMI_Computer_Competition_Results_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(workbook, filename);
         }
-
     </script>
 </body>
 </html>
