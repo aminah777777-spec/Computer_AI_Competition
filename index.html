@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="html-tag">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مسابقة قسم الكمبيوتر - معاهد الغد المشرق الأزهري للغات</title>
-    <!-- مكتبة Tailwind CSS للتصميم -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- مكتبة SweetAlert للرسائل المنبثقة -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- مكتبة SheetJS لتصدير الإكسيل -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -19,286 +16,54 @@
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 sm:p-8">
 
-    <!-- الشعار والعنوان -->
     <header class="text-center mb-8">
-        <img src="logo.jpeg" alt="شعار معهد الغد المشرق" class="w-32 h-32 mx-auto rounded-lg mb-4 object-contain bg-white">
-        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">معهد الغد المشرق الأزهري للغات</h1>
-        <h2 class="text-lg text-orange-400">مسابقة قسم الكمبيوتر والذكاء الاصطناعي - الإعدادي والثانوي</h2>
+        <img src="logo.jpeg" alt="شعار المعهد" class="w-32 h-32 mx-auto rounded-lg mb-4 object-contain bg-white">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2" id="main-title">معهد الغد المشرق الأزهري للغات</h1>
+        <h2 class="text-lg text-orange-400" id="sub-title">مسابقة قسم الكمبيوتر والذكاء الاصطناعي - الإعدادي والثانوي</h2>
     </header>
 
-    <!-- شاشة التسجيل -->
-    <main id="login-screen" class="glass-panel p-6 sm:p-8 rounded-2xl w-full max-w-md relative">
+    <!-- 1. شاشة اختيار اللغة -->
+    <main id="language-screen" class="glass-panel p-6 sm:p-8 rounded-2xl w-full max-w-md text-center relative">
         <button id="admin-btn" class="absolute top-4 left-4 text-sm text-gray-400 hover:text-white flex items-center gap-1">
             <span>⚙️ الإدارة</span>
         </button>
-        <h3 class="text-2xl font-bold text-center text-orange-500 mb-6 mt-4">تسجيل الطالب</h3>
+        <h3 class="text-2xl font-bold text-white mb-8 mt-4">اختر قسمك / Choose Your Section</h3>
+        <div class="space-y-4">
+            <button onclick="selectLanguage('ar')" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors">
+                القسم العربي (Arabic)
+            </button>
+            <button onclick="selectLanguage('en')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors" dir="ltr">
+                قسم اللغات (Languages)
+            </button>
+        </div>
+    </main>
+
+    <!-- 2. شاشة التسجيل -->
+    <section id="login-screen" class="hidden-section glass-panel p-6 sm:p-8 rounded-2xl w-full max-w-md">
+        <button onclick="goBackToLanguage()" class="text-gray-400 hover:text-white mb-4 text-sm" id="back-btn">➔ رجوع</button>
+        <h3 class="text-2xl font-bold text-center text-orange-500 mb-6" id="login-title">تسجيل الطالب</h3>
         
         <form id="registration-form" class="space-y-4">
             <div>
-                <label class="block text-sm mb-1 text-gray-300">الاسم الرباعي</label>
-                <input type="text" id="student-name" required class="w-full p-3 rounded-lg bg-slate-800 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none text-white">
+                <label class="block text-sm mb-1 text-gray-300" id="lbl-name">الاسم الرباعي</label>
+                <input type="text" id="student-name" required class="w-full p-3 rounded-lg bg-slate-800 border border-slate-600 outline-none text-white">
             </div>
             <div>
-                <label class="block text-sm mb-1 text-gray-300">الصف الدراسي</label>
-                <input type="text" id="student-grade" required placeholder="مثال: الأول الإعدادي" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none text-white">
+                <label class="block text-sm mb-1 text-gray-300" id="lbl-grade">الصف الدراسي</label>
+                <input type="text" id="student-grade" required class="w-full p-3 rounded-lg bg-slate-800 border border-slate-600 outline-none text-white">
             </div>
             <div>
-                <label class="block text-sm mb-1 text-gray-300">البريد الإلكتروني المدرسي</label>
-                <input type="email" id="student-email" required placeholder="example@alghadalmoshreq.edu.eg" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none text-white text-left" dir="ltr">
-                <p class="text-xs text-gray-400 mt-2">⚠️ يجب أن ينتهي بـ @alghadalmoshreq.edu.eg. (محاولة واحدة فقط)</p>
+                <label class="block text-sm mb-1 text-gray-300" id="lbl-email">البريد الإلكتروني المدرسي</label>
+                <input type="email" id="student-email" required class="w-full p-3 rounded-lg bg-slate-800 border border-slate-600 outline-none text-white text-left" dir="ltr">
+                <p class="text-xs text-gray-400 mt-2" id="lbl-note">⚠️ يجب أن ينتهي بـ @alghadalmoshreq.edu.eg. (محاولة واحدة فقط)</p>
             </div>
-            <button type="submit" id="start-btn" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-lg transition-colors mt-4">
+            <button type="submit" id="start-btn" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-lg mt-4">
                 ابدأ المسابقة ▶
             </button>
         </form>
-    </main>
+    </section>
 
-    <!-- شاشة المسابقة -->
+    <!-- 3. شاشة المسابقة -->
     <section id="quiz-screen" class="hidden-section glass-panel p-6 sm:p-8 rounded-2xl w-full max-w-2xl relative">
         <div class="flex justify-between items-center mb-6 border-b border-slate-600 pb-4">
-            <span class="text-orange-400 font-bold" id="question-counter">السؤال 1 من 10</span>
-            <div class="flex items-center gap-2">
-                <span class="text-gray-300">الوقت المتبقي:</span>
-                <span id="timer" class="text-2xl font-bold text-red-500">10</span>
-            </div>
-        </div>
-        <div id="question-container" class="mb-8">
-            <h3 id="question-text" class="text-xl sm:text-2xl font-semibold mb-6">جاري تحميل السؤال...</h3>
-            <div id="options-container" class="space-y-3">
-                <!-- الخيارات ستظهر هنا -->
-            </div>
-        </div>
-    </section>
-
-    <!-- شاشة النتيجة -->
-    <section id="result-screen" class="hidden-section glass-panel p-8 rounded-2xl w-full max-w-md text-center">
-        <h2 class="text-3xl font-bold text-orange-500 mb-4">انتهت المسابقة!</h2>
-        <p class="text-xl mb-4 text-gray-200" id="result-name"></p>
-        <div class="text-6xl mb-6">🏆</div>
-        <p class="text-2xl">نتيجتك هي:</p>
-        <p id="result-score" class="text-5xl font-bold text-green-400 mt-2 mb-6">0 / 10</p>
-        <p class="text-gray-400 text-sm">تم حفظ إجاباتك بنجاح. شكراً لمشاركتك!</p>
-    </section>
-
-    <!-- شاشة الإدارة -->
-    <section id="admin-screen" class="hidden-section glass-panel p-8 rounded-2xl w-full max-w-md relative">
-        <button id="close-admin" class="absolute top-4 left-4 text-xl text-gray-400 hover:text-white">✖</button>
-        <h3 class="text-2xl font-bold text-center text-blue-400 mb-6">لوحة تحكم الإدارة</h3>
-        <div class="space-y-4">
-            <input type="password" id="admin-password" placeholder="كلمة المرور" class="w-full p-3 rounded-lg bg-slate-800 border border-slate-600 outline-none text-white text-center">
-            <button id="export-excel-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors">
-                📥 تحميل نتائج الطلاب (Excel)
-            </button>
-        </div>
-    </section>
-
-    <!-- كود الجافاسكريبت و Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // ⚠️ مهم جداً: استبدلي هذه الأسطر ببيانات مشروعك من Firebase
-        const firebaseConfig = {
-            apiKey: "ضعي_الكود_هنا",
-            authDomain: "gmi-competition.firebaseapp.com",
-            projectId: "gmi-competition",
-            storageBucket: "gmi-competition.appspot.com",
-            messagingSenderId: "ضعي_الرقم_هنا",
-            appId: "ضعي_المعرف_هنا"
-        };
-
-        // تهيئة Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // بنك الأسئلة (يمكنك تعديلها)
-        const questions = [
-            { q: "ما هو اختصار الذكاء الاصطناعي بالإنجليزية؟", options: ["AI", "IT", "CPU", "RAM"], answer: "AI" },
-            { q: "أي من التالي يعتبر جهاز إدخال؟", options: ["الشاشة", "الطابعة", "لوحة المفاتيح", "السماعات"], answer: "لوحة المفاتيح" },
-            { q: "ما هي لغة البرمجة المستخدمة في تصميم صفحات الويب؟", options: ["Python", "HTML", "C++", "Java"], answer: "HTML" },
-            { q: "ما هو العقل المدبر للحاسوب؟", options: ["القرص الصلب", "المعالج CPU", "الشاشة", "الماوس"], answer: "المعالج CPU" },
-            { q: "أي من هذه الخدمات تقدم تخزين سحابي؟", options: ["Google Drive", "Notepad", "Paint", "Calculator"], answer: "Google Drive" }
-        ];
-
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let timerInterval;
-        const TIME_LIMIT = 10;
-        let currentStudent = {};
-
-        // عناصر الواجهة
-        const loginScreen = document.getElementById('login-screen');
-        const quizScreen = document.getElementById('quiz-screen');
-        const resultScreen = document.getElementById('result-screen');
-        const adminScreen = document.getElementById('admin-screen');
-        const regForm = document.getElementById('registration-form');
-
-        // المصادقة المجهولة عند فتح الصفحة
-        signInAnonymously(auth).catch((error) => {
-            console.error("خطأ في المصادقة: ", error);
-        });
-
-        // تسجيل الدخول
-        regForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('student-name').value.trim();
-            const grade = document.getElementById('student-grade').value.trim();
-            const email = document.getElementById('student-email').value.trim().toLowerCase();
-
-            if (!email.endsWith('@alghadalmoshreq.edu.eg')) {
-                Swal.fire('بريد إلكتروني غير صالح', 'يجب استخدام البريد الإلكتروني الرسمي للمعهد (@alghadalmoshreq.edu.eg)', 'error');
-                return;
-            }
-
-            Swal.fire({ title: 'جاري التحقق...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
-
-            try {
-                const q = query(collection(db, "students"), where("email", "==", email));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    Swal.fire('عذراً!', 'هذا البريد الإلكتروني شارك في المسابقة من قبل. المحاولة مرة واحدة فقط.', 'warning');
-                    return;
-                }
-
-                currentStudent = { name, grade, email };
-                Swal.close();
-                startQuiz();
-
-            } catch (error) {
-                console.error("Error:", error);
-                Swal.fire('خطأ في الاتصال', 'يرجى إيقاف مانع الإعلانات (مثل درع متصفح Brave) أو المحاولة من التصفح المتخفي.', 'error');
-            }
-        });
-
-        function startQuiz() {
-            loginScreen.classList.add('hidden-section');
-            quizScreen.classList.remove('hidden-section');
-            showQuestion();
-        }
-
-        function showQuestion() {
-            if (currentQuestionIndex >= questions.length) {
-                endQuiz();
-                return;
-            }
-
-            const q = questions[currentQuestionIndex];
-            document.getElementById('question-counter').innerText = `السؤال ${currentQuestionIndex + 1} من ${questions.length}`;
-            document.getElementById('question-text').innerText = q.q;
-            
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-            
-            q.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-right p-4 rounded-lg bg-slate-700 hover:bg-orange-500 border border-slate-500 transition-colors text-white font-medium";
-                btn.innerText = opt;
-                btn.onclick = () => handleAnswer(opt);
-                optionsContainer.appendChild(btn);
-            });
-
-            startTimer();
-        }
-
-        function startTimer() {
-            let time = TIME_LIMIT;
-            document.getElementById('timer').innerText = time;
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                time--;
-                document.getElementById('timer').innerText = time;
-                if (time <= 0) {
-                    clearInterval(timerInterval);
-                    handleAnswer(null); // انتهاء الوقت
-                }
-            }, 1000);
-        }
-
-        function handleAnswer(selectedOption) {
-            clearInterval(timerInterval);
-            const correctOption = questions[currentQuestionIndex].answer;
-            if (selectedOption === correctOption) {
-                score++;
-            }
-            currentQuestionIndex++;
-            showQuestion();
-        }
-
-        async function endQuiz() {
-            quizScreen.classList.add('hidden-section');
-            resultScreen.classList.remove('hidden-section');
-            
-            document.getElementById('result-name').innerText = currentStudent.name;
-            document.getElementById('result-score').innerText = `${score} / ${questions.length}`;
-
-            try {
-                await addDoc(collection(db, "students"), {
-                    name: currentStudent.name,
-                    grade: currentStudent.grade,
-                    email: currentStudent.email,
-                    score: score,
-                    total: questions.length,
-                    timestamp: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("Error saving score:", error);
-            }
-        }
-
-        // --- نظام الإدارة ---
-        document.getElementById('admin-btn').onclick = () => {
-            loginScreen.classList.add('hidden-section');
-            adminScreen.classList.remove('hidden-section');
-        };
-        document.getElementById('close-admin').onclick = () => {
-            adminScreen.classList.add('hidden-section');
-            loginScreen.classList.remove('hidden-section');
-        };
-
-        document.getElementById('export-excel-btn').onclick = async () => {
-            const pass = document.getElementById('admin-password').value;
-            if (pass !== 'admin123') {
-                Swal.fire('خطأ', 'كلمة المرور غير صحيحة', 'error');
-                return;
-            }
-
-            Swal.fire({ title: 'جاري تجميع البيانات...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "students"));
-                const students = [];
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    students.push({
-                        "الاسم": data.name,
-                        "الصف": data.grade,
-                        "البريد الإلكتروني": data.email,
-                        "النتيجة": data.score,
-                        "الإجمالي": data.total,
-                        "وقت الإرسال": data.timestamp ? data.timestamp.toDate().toLocaleString('ar-EG') : 'غير محدد'
-                    });
-                });
-
-                if (students.length === 0) {
-                    Swal.fire('معلومة', 'لا يوجد بيانات للطلاب حتى الآن.', 'info');
-                    return;
-                }
-
-                const worksheet = XLSX.utils.json_to_sheet(students);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "النتائج");
-                XLSX.writeFile(workbook, "نتائج_مسابقة_الكمبيوتر.xlsx");
-                
-                Swal.fire('تم!', 'تم تحميل ملف الإكسيل بنجاح.', 'success');
-
-            } catch (error) {
-                console.error("Export error:", error);
-                Swal.fire('خطأ', 'حدث خطأ أثناء سحب البيانات', 'error');
-            }
-        };
-    </script>
-</body>
-</html>
+            <span class="text-orange-400 font-bold" id="question-
