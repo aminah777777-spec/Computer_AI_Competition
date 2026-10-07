@@ -833,29 +833,40 @@
         }
 
         function handleTimeOut() {
-            if (isAnswering) return;
-            isAnswering = true;
+            clearInterval(timerInterval);
             playBeep();
-            
+
+            // If the student already answered, automatically move to the next question.
+            if (isAnswering) {
+                setTimeout(() => {
+                    nextQuestion();
+                }, 800);
+                return;
+            }
+
+            isAnswering = true;
+
             // Disable options
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-            
+
             const fb = document.getElementById('feedback-msg');
             fb.textContent = dict[currentLang].timeoutMsg;
             fb.className = 'text-sm font-bold text-red-400 visible';
 
-            saveProgress();
-            
+            // No database request during the quiz.
+
             // Auto advance after short delay
             setTimeout(() => {
                 nextQuestion();
-            }, 1500);
+            }, 800);
         }
 
         async function selectAnswer(selectedIndex, btnElement) {
             if (isAnswering) return;
             isAnswering = true;
-            clearInterval(timerInterval);
+
+            // Keep the timer running after the answer.
+            // When the 10-second question time ends, the next question opens automatically.
 
             // Highlight selected
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
