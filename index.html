@@ -59,17 +59,52 @@
         /* Premium Competition Visuals */
         body {
             background:
-                radial-gradient(circle at 12% 15%, rgba(124,58,237,.22), transparent 28%),
-                radial-gradient(circle at 88% 12%, rgba(34,211,238,.16), transparent 25%),
-                radial-gradient(circle at 50% 100%, rgba(251,146,60,.10), transparent 32%),
-                linear-gradient(135deg, #070b1b 0%, #111936 48%, #1b1745 100%);
+                radial-gradient(circle at 8% 10%, rgba(99,102,241,.34), transparent 30%),
+                radial-gradient(circle at 92% 18%, rgba(6,182,212,.24), transparent 28%),
+                radial-gradient(circle at 50% 100%, rgba(249,115,22,.18), transparent 34%),
+                linear-gradient(135deg, #050816 0%, #111a3d 42%, #25145c 100%) !important;
+        }
+
+        header h1 {
+            text-shadow: 0 0 24px rgba(99,102,241,.28);
+        }
+
+        header .t-dept {
+            color: #67e8f9 !important;
+        }
+
+        #screen-welcome .fas.fa-laptop-code {
+            color: #67e8f9 !important;
+            filter: drop-shadow(0 0 14px rgba(34,211,238,.45));
+        }
+
+        #screen-welcome h2 span {
+            color: #fb923c !important;
+            text-shadow: 0 0 18px rgba(251,146,60,.25);
+        }
+
+        #screen-welcome button:not([onclick*="showAdminLogin"]) {
+            background: linear-gradient(135deg, #312e81, #4c1d95) !important;
+            border-color: rgba(103,232,249,.55) !important;
+            box-shadow: 0 10px 30px rgba(49,46,129,.32);
+        }
+
+        #screen-welcome button:not([onclick*="showAdminLogin"]):hover {
+            background: linear-gradient(135deg, #4338ca, #7e22ce) !important;
+            border-color: #67e8f9 !important;
+            box-shadow: 0 14px 34px rgba(124,58,237,.40);
+        }
+
+        #screen-welcome .bg-red-900\/30 {
+            background: rgba(127,29,29,.20) !important;
+            border-color: rgba(251,113,133,.42) !important;
         }
         .glass-panel {
-            background: linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
+            background: linear-gradient(145deg, rgba(24,35,79,.76), rgba(12,18,43,.82));
             backdrop-filter: blur(18px);
-            border: 1px solid rgba(255,255,255,.12);
+            border: 1px solid rgba(129,140,248,.24);
             border-radius: 1.35rem;
-            box-shadow: 0 25px 70px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.08);
+            box-shadow: 0 25px 70px rgba(0,0,0,.48), 0 0 35px rgba(67,56,202,.10), inset 0 1px 0 rgba(255,255,255,.09);
         }
         .option-btn {
             background: linear-gradient(135deg, rgba(30,41,80,.88), rgba(17,24,50,.92));
@@ -1095,6 +1130,35 @@
             const filename = `GMI_Computer_Competition_Results_${new Date().toISOString().split('T')[0]}.xlsx`;
             XLSX.writeFile(workbook, filename);
         }
+
+
+        // Reliable first-screen button bindings
+        document.addEventListener('DOMContentLoaded', () => {
+            const englishBtn = document.querySelector('#screen-welcome button[onclick*="selectLanguage(\'en\')"]');
+            const arabicBtn = document.querySelector('#screen-welcome button[onclick*="selectLanguage(\'ar\')"]');
+            const adminBtn = document.querySelector('#screen-welcome button[onclick*="showAdminLogin"]');
+
+            if (englishBtn) {
+                englishBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    selectLanguage('en');
+                });
+            }
+
+            if (arabicBtn) {
+                arabicBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    selectLanguage('ar');
+                });
+            }
+
+            if (adminBtn) {
+                adminBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    showAdminLogin();
+                });
+            }
+        });
 
     </script>
 </body>
