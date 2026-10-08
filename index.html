@@ -56,6 +56,55 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Premium Competition Visuals */
+        body {
+            background:
+                radial-gradient(circle at 12% 15%, rgba(124,58,237,.22), transparent 28%),
+                radial-gradient(circle at 88% 12%, rgba(34,211,238,.16), transparent 25%),
+                radial-gradient(circle at 50% 100%, rgba(251,146,60,.10), transparent 32%),
+                linear-gradient(135deg, #070b1b 0%, #111936 48%, #1b1745 100%);
+        }
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.035));
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 1.35rem;
+            box-shadow: 0 25px 70px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.08);
+        }
+        .option-btn {
+            background: linear-gradient(135deg, rgba(30,41,80,.88), rgba(17,24,50,.92));
+            border-color: rgba(129,140,248,.22);
+            transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(67,56,202,.42), rgba(17,24,50,.96));
+            border-color: rgba(34,211,238,.55);
+            box-shadow: 0 10px 28px rgba(67,56,202,.20);
+        }
+        .option-btn.selected {
+            background: linear-gradient(135deg, #7c3aed, #4338ca);
+            border-color: #a78bfa;
+            box-shadow: 0 0 25px rgba(124,58,237,.30);
+        }
+        #btn-next:not(:disabled) {
+            background: linear-gradient(135deg, #f97316, #ea580c) !important;
+            box-shadow: 0 10px 30px rgba(249,115,22,.28);
+        }
+        #btn-next:not(:disabled):hover {
+            transform: translateY(-2px);
+        }
+        #progress-bar {
+            background: linear-gradient(90deg, #22d3ee, #7c3aed, #fb923c) !important;
+            box-shadow: 0 0 14px rgba(124,58,237,.35);
+        }
+        #timer-path { filter: drop-shadow(0 0 7px rgba(251,146,60,.35)); }
+        #question-text { text-shadow: 0 2px 18px rgba(0,0,0,.25); }
+        .competition-badge {
+            background: linear-gradient(135deg, rgba(124,58,237,.20), rgba(34,211,238,.10));
+            border: 1px solid rgba(167,139,250,.22);
+        }
+
         /* Timer Ring Animation */
         .timer-ring {
             transform: rotate(-90deg);
@@ -222,8 +271,8 @@
                         <circle id="timer-path" class="text-brand-orange stroke-current timer-circle" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="45" fill="transparent"></circle>
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center flex-col">
-                        <span id="timer-text" class="text-2xl font-bold">10</span>
-                        <span class="text-[0.6rem] text-gray-400 uppercase t-sec">sec</span>
+                        <span id="timer-text" class="text-xl sm:text-2xl font-extrabold tracking-tight">6:00</span>
+                        <span class="text-[0.6rem] text-gray-400 uppercase">remaining</span>
                     </div>
                 </div>
                 
@@ -582,8 +631,11 @@
         let currentQuestions = [];
         let currentIndex = 0;
         let score = 0;
+        // Global competition timer: 6 minutes for all 25 questions
+        const TOTAL_TIME_SECONDS = 6 * 60;
         let timerInterval;
-        let timeLeft = 10;
+        let timeLeft = TOTAL_TIME_SECONDS;
+        let competitionStartTime = null;
         let docId = null; // Apps Script participant key (row + token)
         let isAnswering = false;
         let participantInfo = {};
@@ -717,6 +769,9 @@
 
             currentIndex = 0;
             score = 0;
+            competitionStartTime = null;
+            clearInterval(timerInterval);
+            timeLeft = TOTAL_TIME_SECONDS;
 
             switchScreen('quiz');
             loadQuestion();
@@ -795,18 +850,21 @@
                 nextBtn.querySelector('i').className = currentLang === 'en' ? 'fas fa-arrow-right' : 'fas fa-arrow-left';
             }
 
-            startTimer();
+            if (currentIndex === 0 && !competitionStartTime) {
+                startCompetitionTimer();
+            }
         }
 
-        function startTimer() {
+        function startCompetitionTimer() {
             clearInterval(timerInterval);
-            timeLeft = 10;
+            competitionStartTime = Date.now();
+            timeLeft = TOTAL_TIME_SECONDS;
             updateTimerUI();
 
             timerInterval = setInterval(() => {
                 timeLeft--;
                 updateTimerUI();
-                
+
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     handleTimeOut();
@@ -815,50 +873,46 @@
         }
 
         function updateTimerUI() {
-            document.getElementById('timer-text').textContent = timeLeft;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer-text').textContent =
+                `${minutes}:${String(seconds).padStart(2, '0')}`;
+
             const circle = document.getElementById('timer-path');
             const circumference = 283;
-            const offset = circumference - (timeLeft / 10) * circumference;
+            const offset = circumference - (timeLeft / TOTAL_TIME_SECONDS) * circumference;
             circle.style.strokeDashoffset = offset;
-            
-            if (timeLeft <= 3) {
-                circle.classList.remove('text-brand-orange');
+
+            const timerText = document.getElementById('timer-text');
+
+            if (timeLeft <= 60) {
+                circle.classList.remove('text-brand-orange', 'text-yellow-400');
                 circle.classList.add('text-red-500');
-                document.getElementById('timer-text').classList.add('text-red-500', 'animate-pulse');
+                timerText.classList.add('text-red-500', 'animate-pulse');
+                timerText.classList.remove('text-yellow-400');
+            } else if (timeLeft <= 180) {
+                circle.classList.remove('text-brand-orange', 'text-red-500');
+                circle.classList.add('text-yellow-400');
+                timerText.classList.remove('text-red-500', 'animate-pulse');
+                timerText.classList.add('text-yellow-400');
             } else {
                 circle.classList.add('text-brand-orange');
-                circle.classList.remove('text-red-500');
-                document.getElementById('timer-text').classList.remove('text-red-500', 'animate-pulse');
+                circle.classList.remove('text-red-500', 'text-yellow-400');
+                timerText.classList.remove('text-red-500', 'text-yellow-400', 'animate-pulse');
             }
         }
 
         function handleTimeOut() {
             clearInterval(timerInterval);
-            playBeep();
-
-            // If the student already answered, automatically move to the next question.
-            if (isAnswering) {
-                setTimeout(() => {
-                    nextQuestion();
-                }, 800);
-                return;
-            }
-
-            isAnswering = true;
-
-            // Disable options
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
 
             const fb = document.getElementById('feedback-msg');
-            fb.textContent = dict[currentLang].timeoutMsg;
+            fb.textContent = currentLang === 'en'
+                ? "Time is up! Submitting your final score..."
+                : "انتهى الوقت! جارٍ إرسال النتيجة النهائية...";
             fb.className = 'text-sm font-bold text-red-400 visible';
 
-            // No database request during the quiz.
-
-            // Auto advance after short delay
-            setTimeout(() => {
-                nextQuestion();
-            }, 800);
+            setTimeout(() => finishCompetition(), 900);
         }
 
         async function selectAnswer(selectedIndex, btnElement) {
