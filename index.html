@@ -56,90 +56,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Premium Competition Visuals */
-        body {
-            background:
-                radial-gradient(circle at 8% 10%, rgba(99,102,241,.34), transparent 30%),
-                radial-gradient(circle at 92% 18%, rgba(6,182,212,.24), transparent 28%),
-                radial-gradient(circle at 50% 100%, rgba(249,115,22,.18), transparent 34%),
-                linear-gradient(135deg, #050816 0%, #111a3d 42%, #25145c 100%) !important;
-        }
-
-        header h1 {
-            text-shadow: 0 0 24px rgba(99,102,241,.28);
-        }
-
-        header .t-dept {
-            color: #67e8f9 !important;
-        }
-
-        #screen-welcome .fas.fa-laptop-code {
-            color: #67e8f9 !important;
-            filter: drop-shadow(0 0 14px rgba(34,211,238,.45));
-        }
-
-        #screen-welcome h2 span {
-            color: #fb923c !important;
-            text-shadow: 0 0 18px rgba(251,146,60,.25);
-        }
-
-        #screen-welcome button:not([onclick*="showAdminLogin"]) {
-            background: linear-gradient(135deg, #312e81, #4c1d95) !important;
-            border-color: rgba(103,232,249,.55) !important;
-            box-shadow: 0 10px 30px rgba(49,46,129,.32);
-        }
-
-        #screen-welcome button:not([onclick*="showAdminLogin"]):hover {
-            background: linear-gradient(135deg, #4338ca, #7e22ce) !important;
-            border-color: #67e8f9 !important;
-            box-shadow: 0 14px 34px rgba(124,58,237,.40);
-        }
-
-        #screen-welcome .bg-red-900\/30 {
-            background: rgba(127,29,29,.20) !important;
-            border-color: rgba(251,113,133,.42) !important;
-        }
-        .glass-panel {
-            background: linear-gradient(145deg, rgba(24,35,79,.76), rgba(12,18,43,.82));
-            backdrop-filter: blur(18px);
-            border: 1px solid rgba(129,140,248,.24);
-            border-radius: 1.35rem;
-            box-shadow: 0 25px 70px rgba(0,0,0,.48), 0 0 35px rgba(67,56,202,.10), inset 0 1px 0 rgba(255,255,255,.09);
-        }
-        .option-btn {
-            background: linear-gradient(135deg, rgba(30,41,80,.88), rgba(17,24,50,.92));
-            border-color: rgba(129,140,248,.22);
-            transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
-        }
-        .option-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            background: linear-gradient(135deg, rgba(67,56,202,.42), rgba(17,24,50,.96));
-            border-color: rgba(34,211,238,.55);
-            box-shadow: 0 10px 28px rgba(67,56,202,.20);
-        }
-        .option-btn.selected {
-            background: linear-gradient(135deg, #7c3aed, #4338ca);
-            border-color: #a78bfa;
-            box-shadow: 0 0 25px rgba(124,58,237,.30);
-        }
-        #btn-next:not(:disabled) {
-            background: linear-gradient(135deg, #f97316, #ea580c) !important;
-            box-shadow: 0 10px 30px rgba(249,115,22,.28);
-        }
-        #btn-next:not(:disabled):hover {
-            transform: translateY(-2px);
-        }
-        #progress-bar {
-            background: linear-gradient(90deg, #22d3ee, #7c3aed, #fb923c) !important;
-            box-shadow: 0 0 14px rgba(124,58,237,.35);
-        }
-        #timer-path { filter: drop-shadow(0 0 7px rgba(251,146,60,.35)); }
-        #question-text { text-shadow: 0 2px 18px rgba(0,0,0,.25); }
-        .competition-badge {
-            background: linear-gradient(135deg, rgba(124,58,237,.20), rgba(34,211,238,.10));
-            border: 1px solid rgba(167,139,250,.22);
-        }
-
         /* Timer Ring Animation */
         .timer-ring {
             transform: rotate(-90deg);
@@ -199,6 +115,58 @@
             background-image: radial-gradient(circle at 15% 50%, rgba(249, 115, 22, 0.1), transparent 25%),
                               radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.2), transparent 25%);
         }
+
+        /* ===== PREMIUM COMPETITION THEME ===== */
+        body {
+            background:
+              radial-gradient(circle at 10% 10%, rgba(99,102,241,.35), transparent 28%),
+              radial-gradient(circle at 90% 20%, rgba(6,182,212,.25), transparent 26%),
+              linear-gradient(135deg, #050b1d 0%, #111b3d 48%, #241044 100%) !important;
+        }
+        #particles { opacity:.9 !important; background-image:
+          radial-gradient(circle at 15% 25%, rgba(6,182,212,.18), transparent 22%),
+          radial-gradient(circle at 85% 75%, rgba(139,92,246,.22), transparent 25%) !important; }
+        header .t-school-name { text-shadow:0 0 22px rgba(56,189,248,.35); }
+        header .t-dept { color:#67e8f9 !important; }
+        #screen-welcome {
+            background:linear-gradient(145deg, rgba(15,23,42,.94), rgba(49,46,129,.70)) !important;
+            border:1px solid rgba(103,232,249,.35) !important;
+            box-shadow:0 30px 80px rgba(0,0,0,.55), 0 0 45px rgba(99,102,241,.16) !important;
+        }
+        #screen-welcome h2 span { color:#fb923c !important; text-shadow:0 0 18px rgba(251,146,60,.35); }
+        #screen-welcome .fa-laptop-code { color:#67e8f9 !important; filter:drop-shadow(0 0 12px rgba(103,232,249,.45)); }
+        #btn-lang-en, #btn-lang-ar {
+            background:linear-gradient(135deg,#4f46e5,#7c3aed) !important;
+            border:2px solid #67e8f9 !important;
+            min-height:64px;
+            box-shadow:0 12px 28px rgba(79,70,229,.35) !important;
+        }
+        #btn-lang-en:hover, #btn-lang-ar:hover {
+            background:linear-gradient(135deg,#6366f1,#9333ea) !important;
+            transform:translateY(-3px) scale(1.02) !important;
+            box-shadow:0 18px 35px rgba(124,58,237,.5) !important;
+        }
+        #btn-admin { color:#94a3b8 !important; }
+        #screen-quiz {
+            background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(30,41,90,.88)) !important;
+            border-color:rgba(103,232,249,.25) !important;
+        }
+        #screen-quiz .option-btn {
+            background:rgba(30,41,90,.82) !important;
+            border-color:rgba(129,140,248,.42) !important;
+        }
+        #screen-quiz .option-btn:hover:not(:disabled) {
+            background:rgba(79,70,229,.48) !important;
+            border-color:#67e8f9 !important;
+        }
+        #screen-quiz .option-btn.selected {
+            background:linear-gradient(135deg,#f97316,#ea580c) !important;
+            border-color:#fdba74 !important;
+        }
+        #screen-quiz .timer-ring { filter:drop-shadow(0 0 10px rgba(249,115,22,.35)); }
+        #screen-quiz .timer-danger { animation:timerDanger .8s ease-in-out infinite alternate; }
+        @keyframes timerDanger { from{filter:drop-shadow(0 0 5px rgba(239,68,68,.25));} to{filter:drop-shadow(0 0 22px rgba(239,68,68,.75));} }
+        #screen-results { background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(49,46,129,.78)) !important; border-color:rgba(250,204,21,.35) !important; }
     </style>
 </head>
 <body class="text-gray-100 antialiased flex flex-col items-center p-4 sm:p-8">
@@ -226,10 +194,10 @@
 
             <h3 class="text-xl font-semibold mb-6">Please choose your language / يرجى اختيار اللغة</h3>
             <div class="flex flex-col sm:flex-row gap-4 w-full">
-                <button onclick="selectLanguage('en')" class="flex-1 bg-brand-blue hover:bg-blue-800 border-2 border-blue-500 text-white font-bold py-4 px-6 rounded-xl text-xl transition transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                <button id="btn-lang-en" onclick="selectLanguage('en')" class="flex-1 bg-brand-blue hover:bg-blue-800 border-2 border-blue-500 text-white font-bold py-4 px-6 rounded-xl text-xl transition transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
                     English
                 </button>
-                <button onclick="selectLanguage('ar')" class="flex-1 bg-brand-blue hover:bg-blue-800 border-2 border-brand-orange text-white font-bold py-4 px-6 rounded-xl text-2xl font-arabic transition transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
+                <button id="btn-lang-ar" onclick="selectLanguage('ar')" class="flex-1 bg-brand-blue hover:bg-blue-800 border-2 border-brand-orange text-white font-bold py-4 px-6 rounded-xl text-2xl font-arabic transition transform hover:scale-105 shadow-lg flex items-center justify-center gap-3">
                     العربية
                 </button>
             </div>
@@ -244,7 +212,7 @@
                 </p>
             </div>
 
-            <button onclick="showAdminLogin()" class="mt-8 text-sm text-gray-500 hover:text-white transition underline">Admin Access</button>
+            <button id="btn-admin" onclick="showAdminLogin()" class="mt-8 text-sm text-gray-500 hover:text-white transition underline">Admin Access</button>
         </section>
 
         <!-- SCREEN 2: Registration -->
@@ -297,7 +265,7 @@
                 </div>
             </div>
 
-            <!-- Timer and Question -->
+            <!-- Global Timer and Question -->
             <div class="flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-8">
                 <!-- Timer SVG -->
                 <div class="relative w-24 h-24 flex-shrink-0">
@@ -306,8 +274,8 @@
                         <circle id="timer-path" class="text-brand-orange stroke-current timer-circle" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="45" fill="transparent"></circle>
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center flex-col">
-                        <span id="timer-text" class="text-xl sm:text-2xl font-extrabold tracking-tight">6:00</span>
-                        <span class="text-[0.6rem] text-gray-400 uppercase">remaining</span>
+                        <span id="timer-text" class="text-2xl font-bold">6:00</span>
+                        <span class="text-[0.6rem] text-gray-400 uppercase t-sec">min</span>
                     </div>
                 </div>
                 
@@ -353,7 +321,7 @@
                 <div class="mt-6 pt-6 border-t border-gray-700 flex flex-col items-center">
                     <span class="text-gray-400 text-sm mb-1 t-res-score">Final Score</span>
                     <div class="text-5xl font-extrabold text-brand-orange">
-                        <span id="res-score">0</span><span class="text-2xl text-gray-500"> / 25</span>
+                        <span id="res-score">0</span><span class="text-2xl text-gray-500"> / <span id="res-total">25</span></span>
                     </div>
                 </div>
             </div>
@@ -666,11 +634,10 @@
         let currentQuestions = [];
         let currentIndex = 0;
         let score = 0;
-        // Global competition timer: 6 minutes for all 25 questions
-        const TOTAL_TIME_SECONDS = 6 * 60;
         let timerInterval;
+        const TOTAL_TIME_SECONDS = 6 * 60;
         let timeLeft = TOTAL_TIME_SECONDS;
-        let competitionStartTime = null;
+        let competitionStarted = false;
         let docId = null; // Apps Script participant key (row + token)
         let isAnswering = false;
         let participantInfo = {};
@@ -804,12 +771,10 @@
 
             currentIndex = 0;
             score = 0;
-            competitionStartTime = null;
-            clearInterval(timerInterval);
-            timeLeft = TOTAL_TIME_SECONDS;
 
             switchScreen('quiz');
             loadQuestion();
+            startTimer();
         }
 
         function playBeep() {
@@ -885,21 +850,17 @@
                 nextBtn.querySelector('i').className = currentLang === 'en' ? 'fas fa-arrow-right' : 'fas fa-arrow-left';
             }
 
-            if (currentIndex === 0 && !competitionStartTime) {
-                startCompetitionTimer();
-            }
         }
 
-        function startCompetitionTimer() {
+        function startTimer() {
             clearInterval(timerInterval);
-            competitionStartTime = Date.now();
             timeLeft = TOTAL_TIME_SECONDS;
+            competitionStarted = true;
             updateTimerUI();
 
             timerInterval = setInterval(() => {
                 timeLeft--;
                 updateTimerUI();
-
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     handleTimeOut();
@@ -908,54 +869,50 @@
         }
 
         function updateTimerUI() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            document.getElementById('timer-text').textContent =
-                `${minutes}:${String(seconds).padStart(2, '0')}`;
+            const minutes = Math.floor(Math.max(0, timeLeft) / 60);
+            const seconds = Math.max(0, timeLeft) % 60;
+            document.getElementById('timer-text').textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
 
             const circle = document.getElementById('timer-path');
             const circumference = 283;
-            const offset = circumference - (timeLeft / TOTAL_TIME_SECONDS) * circumference;
+            const offset = circumference - (Math.max(0, timeLeft) / TOTAL_TIME_SECONDS) * circumference;
             circle.style.strokeDashoffset = offset;
 
+            const timerBox = document.querySelector('#screen-quiz .timer-ring')?.parentElement;
             const timerText = document.getElementById('timer-text');
-
+            circle.classList.remove('text-brand-orange','text-yellow-400','text-red-500');
+            timerText.classList.remove('text-brand-orange','text-yellow-400','text-red-500','animate-pulse');
             if (timeLeft <= 60) {
-                circle.classList.remove('text-brand-orange', 'text-yellow-400');
                 circle.classList.add('text-red-500');
-                timerText.classList.add('text-red-500', 'animate-pulse');
-                timerText.classList.remove('text-yellow-400');
+                timerText.classList.add('text-red-500','animate-pulse');
+                timerBox?.classList.add('timer-danger');
             } else if (timeLeft <= 180) {
-                circle.classList.remove('text-brand-orange', 'text-red-500');
                 circle.classList.add('text-yellow-400');
-                timerText.classList.remove('text-red-500', 'animate-pulse');
                 timerText.classList.add('text-yellow-400');
+                timerBox?.classList.remove('timer-danger');
             } else {
                 circle.classList.add('text-brand-orange');
-                circle.classList.remove('text-red-500', 'text-yellow-400');
-                timerText.classList.remove('text-red-500', 'text-yellow-400', 'animate-pulse');
+                timerText.classList.add('text-brand-orange');
+                timerBox?.classList.remove('timer-danger');
             }
         }
 
         function handleTimeOut() {
-            clearInterval(timerInterval);
+            if (!competitionStarted) return;
+            competitionStarted = false;
+            isAnswering = true;
+            playBeep();
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-
             const fb = document.getElementById('feedback-msg');
-            fb.textContent = currentLang === 'en'
-                ? "Time is up! Submitting your final score..."
-                : "انتهى الوقت! جارٍ إرسال النتيجة النهائية...";
+            fb.textContent = dict[currentLang].timeoutMsg;
             fb.className = 'text-sm font-bold text-red-400 visible';
-
-            setTimeout(() => finishCompetition(), 900);
+            setTimeout(() => finishCompetition(), 700);
         }
 
         async function selectAnswer(selectedIndex, btnElement) {
             if (isAnswering) return;
             isAnswering = true;
-
-            // Keep the timer running after the answer.
-            // When the 10-second question time ends, the next question opens automatically.
+            // Global 6-minute timer continues after answering.
 
             // Highlight selected
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
@@ -1002,6 +959,7 @@
 
         async function finishCompetition() {
             clearInterval(timerInterval);
+            competitionStarted = false;
             document.getElementById('progress-bar').style.width = `100%`;
 
             try {
@@ -1021,6 +979,7 @@
             document.getElementById('res-class').textContent = participantInfo.class;
             document.getElementById('res-lang').textContent = participantInfo.language;
             document.getElementById('res-score').textContent = score;
+            document.getElementById('res-total').textContent = currentQuestions.length;
 
             switchScreen('results');
         }
@@ -1131,33 +1090,14 @@
             XLSX.writeFile(workbook, filename);
         }
 
-
-        // Reliable first-screen button bindings
-        document.addEventListener('DOMContentLoaded', () => {
-            const englishBtn = document.querySelector('#screen-welcome button[onclick*="selectLanguage(\'en\')"]');
-            const arabicBtn = document.querySelector('#screen-welcome button[onclick*="selectLanguage(\'ar\')"]');
-            const adminBtn = document.querySelector('#screen-welcome button[onclick*="showAdminLogin"]');
-
-            if (englishBtn) {
-                englishBtn.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    selectLanguage('en');
-                });
-            }
-
-            if (arabicBtn) {
-                arabicBtn.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    selectLanguage('ar');
-                });
-            }
-
-            if (adminBtn) {
-                adminBtn.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    showAdminLogin();
-                });
-            }
+        // Robust first-screen button wiring: works even if inline handlers are blocked by the browser.
+        document.addEventListener('DOMContentLoaded', function () {
+            const en = document.getElementById('btn-lang-en');
+            const ar = document.getElementById('btn-lang-ar');
+            const admin = document.getElementById('btn-admin');
+            if (en) en.addEventListener('click', function (e) { e.preventDefault(); selectLanguage('en'); });
+            if (ar) ar.addEventListener('click', function (e) { e.preventDefault(); selectLanguage('ar'); });
+            if (admin) admin.addEventListener('click', function (e) { e.preventDefault(); showAdminLogin(); });
         });
 
     </script>
