@@ -222,7 +222,7 @@
                         <circle id="timer-path" class="text-brand-orange stroke-current timer-circle" stroke-width="8" stroke-linecap="round" cx="50" cy="50" r="45" fill="transparent"></circle>
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center flex-col">
-                        <span id="timer-text" class="text-2xl font-bold">6:00</span>
+                        <span id="timer-text" class="text-2xl font-bold">5:00</span>
                         <span class="text-[0.6rem] text-gray-400 uppercase t-sec">sec</span>
                     </div>
                 </div>
@@ -240,9 +240,14 @@
             <!-- Bottom Actions -->
             <div class="flex justify-between items-center mt-auto border-t border-gray-700 pt-6">
                 <div id="feedback-msg" class="text-sm font-semibold invisible">Message</div>
-                <button id="btn-next" onclick="nextQuestion()" disabled class="bg-gray-600 text-gray-300 font-bold py-3 px-8 rounded-lg transition opacity-50 cursor-not-allowed flex items-center gap-2">
-                    <span class="t-next">Next</span> <i class="fas fa-arrow-right" id="btn-next-icon"></i>
-                </button>
+                <div class="flex items-center gap-3">
+                    <button id="btn-confirm" onclick="confirmAnswer()" disabled class="bg-gray-600 text-gray-300 font-bold py-3 px-6 rounded-lg transition opacity-50 cursor-not-allowed flex items-center gap-2">
+                        <i class="fas fa-check"></i> <span class="t-confirm">Confirm</span>
+                    </button>
+                    <button id="btn-next" onclick="nextQuestion()" disabled class="bg-gray-600 text-gray-300 font-bold py-3 px-8 rounded-lg transition opacity-50 cursor-not-allowed flex items-center gap-2">
+                        <span class="t-next">Next</span> <i class="fas fa-arrow-right" id="btn-next-icon"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -583,7 +588,7 @@
         let currentIndex = 0;
         let score = 0;
         let timerInterval;
-        let timeLeft = 360;
+        let timeLeft = 300;
         let docId = null; // Apps Script participant key (row + token)
         let isAnswering = false;
         let participantInfo = {};
@@ -626,6 +631,7 @@
             document.querySelector('.t-question').textContent = d.question;
             document.querySelector('.t-sec').textContent = d.sec;
             document.querySelector('.t-next').textContent = d.next;
+             document.querySelector('.t-confirm').textContent = d.confirm;
             document.querySelector('.t-res-congrats').textContent = d.resCongrats;
             document.querySelector('.t-res-msg').textContent = d.resMsg;
             document.querySelector('.t-res-name').textContent = d.resName;
@@ -750,6 +756,8 @@
             }
 
             isAnswering = false;
+            selectedAnswerIndex = null;
+            isConfirmed = false;
             const q = currentQuestions[currentIndex];
             
             // Update UI
@@ -780,11 +788,20 @@
             });
 
             // Reset UI states
-            document.getElementById('feedback-msg').style.visibility = 'hidden';
+            const feedback = document.getElementById('feedback-msg');
+            feedback.textContent = 'Message';
+            feedback.className = 'text-sm font-semibold invisible';
+
+            const confirmBtn = document.getElementById('btn-confirm');
+            confirmBtn.disabled = true;
+            confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            confirmBtn.classList.remove('bg-brand-orange', 'hover:bg-orange-600', 'text-white', 'shadow-lg');
+            confirmBtn.classList.add('bg-gray-600', 'text-gray-300');
+
             const nextBtn = document.getElementById('btn-next');
             nextBtn.disabled = true;
             nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            nextBtn.classList.remove('bg-brand-orange', 'hover:bg-orange-600', 'text-white');
+            nextBtn.classList.remove('bg-brand-orange', 'hover:bg-orange-600', 'text-white', 'shadow-lg');
             nextBtn.classList.add('bg-gray-600', 'text-gray-300');
             
             // Final button check
@@ -800,7 +817,7 @@
 
         function startGlobalTimer() {
             clearInterval(timerInterval);
-            timeLeft = 360; // 6 minutes = 360 seconds
+            timeLeft = 300; // 5 minutes = 300 seconds
             updateTimerUI();
 
             timerInterval = setInterval(() => {
@@ -829,7 +846,7 @@
             const circumference = 283;
 
             // Progress based on the full 360-second competition duration
-            const offset = circumference - (timeLeft / 360) * circumference;
+            const offset = circumference - (timeLeft / 300) * circumference;
             circle.style.strokeDashoffset = offset;
 
             // Red + pulse during the last 30 seconds
@@ -854,8 +871,10 @@
             playBeep();
             isAnswering = true;
 
-            // Disable answer buttons
+            // Disable answer and action buttons when the global timer ends.
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            document.getElementById('btn-confirm').disabled = true;
+            document.getElementById('btn-next').disabled = true;
 
             const fb = document.getElementById('feedback-msg');
             fb.textContent = dict[currentLang].timeoutMsg;
@@ -867,40 +886,67 @@
             }, 1500);
         }
 
-        async function selectAnswer(selectedIndex, btnElement) {
-            if (isAnswering) return;
-            isAnswering = true;
+        function selectAnswer(selectedIndex, btnElement) {
+            if (isAnswering || isConfirmed) return;
 
-            // Keep the global competition timer running after the answer.
-            // The timer is shared across all 25 questions.
+            selectedAnswerIndex = selectedIndex;
 
-            // Highlight selected
-            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            // The student may change the selection until Confirm is pressed.
+            document.querySelectorAll('.option-btn').forEach(b => {
+                b.classList.remove('selected');
+                b.querySelector('i').classList.add('opacity-0');
+            });
+
             btnElement.classList.add('selected');
             btnElement.querySelector('i').classList.remove('opacity-0');
-            
+
+            const confirmBtn = document.getElementById('btn-confirm');
+            confirmBtn.disabled = false;
+            confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-600', 'text-gray-300');
+            confirmBtn.classList.add('bg-brand-orange', 'hover:bg-orange-600', 'text-white', 'shadow-lg');
+        }
+
+        function confirmAnswer() {
+            if (selectedAnswerIndex === null || isConfirmed || isAnswering) return;
+
+            isConfirmed = true;
+            isAnswering = true;
+
             const q = currentQuestions[currentIndex];
-            const isCorrect = selectedIndex === q.answer;
-            
-            const fb = document.getElementById('feedback-msg');
-            fb.style.visibility = 'visible';
+            const isCorrect = selectedAnswerIndex === q.answer;
+            const buttons = document.querySelectorAll('.option-btn');
+            const selectedBtn = buttons[selectedAnswerIndex];
+
+            buttons.forEach(b => b.disabled = true);
 
             if (isCorrect) {
+                selectedBtn.classList.remove('selected');
+                selectedBtn.classList.add('bg-green-600', 'border-green-400');
+                selectedBtn.querySelector('i').className = 'fas fa-check-circle text-white shrink-0';
                 score++;
-                fb.textContent = dict[currentLang].correctMsg;
-                fb.className = 'text-sm font-bold text-green-400 visible';
             } else {
-                fb.textContent = dict[currentLang].wrongMsg;
-                fb.className = 'text-sm font-bold text-red-400 visible';
+                selectedBtn.classList.remove('selected');
+                selectedBtn.classList.add('bg-red-600', 'border-red-400');
+                selectedBtn.querySelector('i').className = 'fas fa-times-circle text-white shrink-0';
+
+                const correctBtn = buttons[q.answer];
+                correctBtn.classList.add('bg-green-600', 'border-green-400');
+                correctBtn.querySelector('i').className = 'fas fa-check-circle text-white shrink-0';
             }
 
+            const fb = document.getElementById('feedback-msg');
+            fb.textContent = isCorrect ? dict[currentLang].correctMsg : dict[currentLang].wrongMsg;
+            fb.className = isCorrect
+                ? 'text-sm font-bold text-green-400 visible'
+                : 'text-sm font-bold text-red-400 visible';
+
+            const confirmBtn = document.getElementById('btn-confirm');
+            confirmBtn.disabled = true;
+            confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            confirmBtn.classList.remove('bg-brand-orange', 'hover:bg-orange-600', 'text-white', 'shadow-lg');
+            confirmBtn.classList.add('bg-gray-600', 'text-gray-300');
+
             const nextBtn = document.getElementById('btn-next');
-
-            // No database request here.
-            // The score stays in the browser during the quiz.
-            // It is saved only once at the end.
-
-            // Enable Next Button
             nextBtn.disabled = false;
             nextBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-600', 'text-gray-300');
             nextBtn.classList.add('bg-brand-orange', 'hover:bg-orange-600', 'text-white', 'shadow-lg');
@@ -913,6 +959,7 @@
         }
 
         function nextQuestion() {
+            if (!isConfirmed) return;
             currentIndex++;
             loadQuestion();
         }
