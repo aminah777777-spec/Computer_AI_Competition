@@ -361,7 +361,7 @@
     <script>
         // Google Apps Script backend
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSggIKx_aB-HSeEETBd3q6bx6KXmbf2VHwYGS9SoYDm2dB2UlQieznO4fbYnasdJWPRw/exec";
-        const COMPETITION_DURATION_SECONDS = 4 * 60;
+        const COMPETITION_DURATION_SECONDS = 5 * 60;
         const ADMIN_PASSWORD = "Medo2002@2002";
 
         function appsScriptRequest(params) {
@@ -821,7 +821,7 @@
 
         function startGlobalTimer() {
             clearInterval(timerInterval);
-            timeLeft = COMPETITION_DURATION_SECONDS; // 4 minutes = 240 seconds
+            timeLeft = COMPETITION_DURATION_SECONDS; // 5 minutes = 300 seconds
             updateTimerUI();
 
             timerInterval = setInterval(() => {
